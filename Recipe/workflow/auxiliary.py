@@ -295,7 +295,7 @@ def unzip_and_organize(data_folder: str = "./Data") -> None:
 
         print(f"Successfully extracted {zip_file} into {data_folder}")
 
-def ensure_yadg_dgpost_installed():
+def ensure_dependencies():
     """
     Check if 'yadg' and 'dgpost' libraries are installed.
     If not, install them via pip (yadg first, then dgpost).
