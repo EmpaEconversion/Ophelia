@@ -241,7 +241,7 @@ def zip_folder(output_folder: str = './Output', zip_name: str = './Output/output
     print(f"Zipping complete. Archive saved as {zip_name}.")
 
 
-def unzip_and_organize(data_folder: str = "/home/jovyan/work/test-autoplotdb/AutoplotDB/Data") -> None:
+def unzip_and_organize(data_folder: str = "./Data") -> None:
     """
     Unzips all .zip files in a specified directory, ensuring correct extraction:
     - If a ZIP contains a single folder with the same name as the ZIP, extract only its contents.
