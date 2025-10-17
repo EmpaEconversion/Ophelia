@@ -1,0 +1,7 @@
+dependencies = [
+    "yadg==5.0.4",
+    "dgpost==2.1.1",
+]
+
+[tool.black]
+line-length = 140
