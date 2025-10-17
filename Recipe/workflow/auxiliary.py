@@ -7,6 +7,7 @@ from .slicer import single, multiplex
 import zipfile
 import json
 from collections import Counter
+import glob
 
 def clear_dir(output_dir: str) -> None:
     """
