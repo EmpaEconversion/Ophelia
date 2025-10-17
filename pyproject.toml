@@ -1,6 +1,6 @@
 dependencies = [
-    "yadg==5.0.4",
-    "dgpost==2.1.1",
+    "yadg",
+    "dgpost",
 ]
 
 [tool.black]
