@@ -3,7 +3,6 @@ This module contains auxiliary functions for that helps managing files such as c
 """
 import os
 import shutil
-from typing import Dict, List
 from .slicer import single, multiplex
 import zipfile
 import json
@@ -211,3 +210,84 @@ def analyze_annotations(data_folder_dir: str) -> None:
     print("\nOccurrences of sequence:location:")
     for location, count in location_counter.items():
         print(f"  Location: {location} : Occurrence: {count}")
+
+
+def zip_folder(output_folder: str = './Output', zip_name: str = './Output/output.zip') -> None:
+    """
+    Compresses the specified folder into a ZIP archive, excluding designated files.
+
+    Args:
+        output_folder (str, optional): Path to the folder to compress. Defaults to './Output'.
+        zip_name (str, optional): Path and filename for the resulting ZIP archive. Defaults to './Output/output.zip'.
+
+    Returns:
+        None
+    """
+    # List files to be zipped, excluding holder.gitignore
+    files_to_zip = []
+    for root, _, files in os.walk(output_folder):
+        for file in files:
+            if file == "holder.gitignore":
+                continue
+            file_path = os.path.join(root, file)
+            files_to_zip.append((file_path, os.path.relpath(file_path, start=output_folder)))
+
+    # Create the ZIP file and add files from the pre-gathered list
+    with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for file_path, arcname in files_to_zip:
+            zipf.write(file_path, arcname=arcname)
+
+    print(f"Zipping complete. Archive saved as {zip_name}.")
+
+
+def unzip_and_organize(data_folder: str = "/home/jovyan/work/test-autoplotdb/AutoplotDB/Data") -> None:
+    """
+    Unzips all .zip files in a specified directory, ensuring correct extraction:
+    - If a ZIP contains a single folder with the same name as the ZIP, extract only its contents.
+    - If a ZIP contains multiple folders/files, extract them directly into data_folder.
+    """
+    # Collect all .zip files in the directory
+    zip_files = glob.glob(f"{data_folder}/*.zip")
+
+    for zip_file in zip_files:
+        # Define a temporary extraction folder
+        temp_extract_folder = os.path.join(data_folder, "temp_extraction")
+        os.makedirs(temp_extract_folder, exist_ok=True)
+        
+        print(f"Unzipping {zip_file} into temporary directory...")
+
+        # Unzip into the temporary directory
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            zip_ref.extractall(temp_extract_folder)
+
+        # Get ZIP file's base name (without .zip)
+        zip_name = os.path.splitext(os.path.basename(zip_file))[0]
+
+        # Get list of extracted items
+        extracted_items = os.listdir(temp_extract_folder)
+
+        # Case 1: ZIP contains a single folder with the same name as the ZIP
+        if len(extracted_items) == 1 and extracted_items[0] == zip_name:
+            extracted_folder_path = os.path.join(temp_extract_folder, zip_name)
+            extracted_contents = os.listdir(extracted_folder_path)
+
+            final_folder = os.path.join(data_folder, zip_name)
+
+            # Remove any existing folder with the same name
+            if os.path.exists(final_folder):
+                shutil.rmtree(final_folder)
+
+            # Move the entire extracted folder to the main directory
+            shutil.move(extracted_folder_path, final_folder)
+
+        else:
+            # Case 2: ZIP contains multiple folders/files -> Extract them directly
+            for item in extracted_items:
+                shutil.move(os.path.join(temp_extract_folder, item), data_folder)
+
+        # Delete the original zip file and temporary extraction folder
+        os.remove(zip_file)
+        shutil.rmtree(temp_extract_folder)
+
+        print(f"Successfully extracted {zip_file} into {data_folder}")
+
